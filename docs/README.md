@@ -1,4 +1,4 @@
-# ☁️ AWS Solutions Architect Portfolio
+ ☁️ AWS Solutions Architect Portfolio
 
 **Cloud Architecture · Serverless Engineering · Data Analytics · FinOps**
 
@@ -23,7 +23,8 @@ These projects demonstrate applied knowledge in **cloud design, data pipelines, 
 ---
 
 ## 🏗️ High-Level Architecture
-![AWS Retail Analytics Architecture Diagram](retail-analytics-platform/docs/AWS_Retail_Analytics_Architecture_Diagram.png)
+
+![AWS Retail Analytics Architecture Diagram](https://raw.githubusercontent.com/JamieChristian22/aws-solutions-architect/main/retail-analytics-platform/docs/AWS_Retail_Analytics_Architecture_Diagram.png)
 
 ---
 
@@ -37,7 +38,7 @@ These projects demonstrate applied knowledge in **cloud design, data pipelines, 
 | **Security & Compliance** | IAM, KMS, WAF, GuardDuty, Security Hub, Macie |
 | **Networking & Delivery** | CloudFront, Route 53, VPC, PrivateLink |
 | **Observability** | CloudWatch, X-Ray, SNS, Budgets, Anomaly Detection |
-| **DevOps & IaC** | AWS CDK, CodePipeline, CodeBuild, CloudFormation |
+| **DevOps / IaC** | AWS CDK, CodePipeline, CodeBuild, CloudFormation |
 | **FinOps** | Budgets, Cost Explorer, Intelligent Tiering, Reserved Savings Plans |
 
 ---

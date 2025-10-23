@@ -24,7 +24,15 @@ The solution enables real-time event ingestion, transformation, and reporting �
 ---
 
 ## 🏗️ High-Level Architecture
-![AWS Retail Analytics Architecture Diagram](docs/AWS_Retail_Analytics_Architecture_Diagram.png)
+![AWS Retail Analytics Architecture Diagram](https://github.com/JamieChristian22/aws-solutions-architect/blob/main/retail-analytics-platform/docs/AWS_Retail_Analytics_Architecture_Diagram.png?raw=true)
+
+**Data Flow:**
+1. **Customer actions** (product views, cart adds, purchases) are sent via **API Gateway** to **Lambda** functions.  
+2. Events are streamed through **Kinesis Data Streams** → **Firehose** → **S3 Data Lake (raw layer)**.  
+3. **AWS Glue** crawlers detect schema and ETL jobs transform data to a curated layer.  
+4. **Athena** and **Redshift Serverless** query curated data for KPIs, dashboards, and ML model retraining.  
+5. **QuickSight** provides visual dashboards for executives and analysts.  
+6. **DynamoDB** stores personalized recommendations served via **API Gateway**.  
 
 **Data Flow:**
 1. **Customer actions** (product views, cart adds, purchases) are sent via **API Gateway** to **Lambda** functions.  

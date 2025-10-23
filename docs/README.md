@@ -1,4 +1,4 @@
- ☁️ AWS Solutions Architect Portfolio
+**☁️ AWS Solutions Architect Portfolio**
 
 **Cloud Architecture · Serverless Engineering · Data Analytics · FinOps**
 

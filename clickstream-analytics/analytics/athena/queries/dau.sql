@@ -1,2 +1,0 @@
-SELECT date(from_iso8601_timestamp(created_at)) AS day, count(distinct user_id) AS dau
-FROM clickstream.events GROUP BY 1 ORDER BY 1 DESC;

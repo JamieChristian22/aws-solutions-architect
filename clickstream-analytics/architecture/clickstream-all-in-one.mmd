@@ -1,0 +1,5 @@
+```mermaid
+flowchart LR
+  SDK-->APIGW-->Lambda-->Kinesis-->[Lambda SP]-->Firehose-->S3
+  [Lambda SP]-->OpenSearch
+```

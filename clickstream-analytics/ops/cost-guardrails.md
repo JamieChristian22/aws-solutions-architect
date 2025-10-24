@@ -1,0 +1,3 @@
+- Start with 1 shard; scale with traffic
+- S3 lifecycle: processed 365d, bad 30d
+- AWS Budgets: $10/$25/$50 alerts

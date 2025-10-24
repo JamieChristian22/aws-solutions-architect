@@ -1,0 +1,23 @@
+{
+  "DeliveryStreamName": "care-mgmt-firehose",
+  "DeliveryStreamType": "KinesisStreamAsSource",
+  "KinesisStreamSourceConfiguration": {
+    "KinesisStreamARN": "arn:aws:kinesis:us-east-1:<ACCOUNT_ID>:stream/care-mgmt-stream",
+    "RoleARN": "arn:aws:iam::<ACCOUNT_ID>:role/FirehoseAccessRole"
+  },
+  "S3DestinationConfiguration": {
+    "BucketARN": "arn:aws:s3:::hcp-raw-zone",
+    "Prefix": "care_mgmt/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/",
+    "CompressionFormat": "GZIP",
+    "EncryptionConfiguration": {
+      "KMSEncryptionConfig": {
+        "AWSKMSKeyARN": "arn:aws:kms:us-east-1:<ACCOUNT_ID>:key/<KMS_KEY_ID>"
+      }
+    },
+    "BufferingHints": {
+      "IntervalInSeconds": 60,
+      "SizeInMBs": 5
+    },
+    "RoleARN": "arn:aws:iam::<ACCOUNT_ID>:role/FirehoseToS3Role"
+  }
+}

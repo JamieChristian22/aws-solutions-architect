@@ -1,0 +1,20 @@
+{
+  "Name": "risk_scoring_job",
+  "Role": "arn:aws:iam::<ACCOUNT_ID>:role/AWSGlueServiceRole-HealthcareDataPlatform",
+  "Command": {
+    "Name": "glueetl",
+    "ScriptLocation": "s3://hcp-etl-scripts/risk_scoring_job.py",
+    "PythonVersion": "3"
+  },
+  "DefaultArguments": {
+    "--job-language": "python",
+    "--enable-continuous-cloudwatch-log": "true",
+    "--enable-glue-datacatalog": "true"
+  },
+  "MaxRetries": 1,
+  "Timeout": 10,
+  "NumberOfWorkers": 2,
+  "WorkerType": "G.1X",
+  "GlueVersion": "4.0",
+  "Description": "Computes patient readmission risk_score and writes curated patient_risk dataset"
+}

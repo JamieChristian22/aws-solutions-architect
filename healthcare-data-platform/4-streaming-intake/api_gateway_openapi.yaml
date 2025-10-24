@@ -1,0 +1,37 @@
+openapi: 3.0.1
+info:
+  title: Care Management Outreach API
+  version: 1.0.0
+paths:
+  /outreach-event:
+    post:
+      summary: Nurse records patient outreach attempt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                patient_id:
+                  type: string
+                status:
+                  type: string
+                  description: successful | unreachable | follow-up-required
+                notes:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        "200":
+          description: Accepted
+      security:
+        - api_key: []
+
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: x-api-key
+      in: header

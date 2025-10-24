@@ -1,0 +1,3 @@
+- Start with 1 shard; scale with traffic.
+- S3 lifecycle: processed -> Intelligent Tiering after 30d; raw/bad -> expire after 30d.
+- Configure AWS Budgets: $10 / $25 / $50 alerts.

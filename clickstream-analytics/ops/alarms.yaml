@@ -1,0 +1,5 @@
+# CloudWatch alarms (define via console or CDK as needed)
+kinesis_iterator_age: > 60000
+lambda_5xx_rate: > 0.01
+firehose_delivery_failures: > 0
+api_5xx_rate: > 0.005

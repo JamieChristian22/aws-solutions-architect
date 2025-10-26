@@ -1,0 +1,31 @@
+```mermaid
+flowchart LR
+    subgraph Edge / Device
+        device[Sensor / Edge Device (Raspberry Pi, ESP32)]
+        device --> mqtt[MQTT Publish\nTopic: factory/line1/sensor/#]
+    end
+
+    subgraph AWS IoT Ingest
+        iotcore[AWS IoT Core (X.509 cert auth + IoT Policy)]
+        rule[IoT Rule:\nSELECT * FROM 'factory/+/sensor/#']
+        iotcore --> rule
+        rule --> kinesis[Kinesis Data Stream\nSensorTelemetryStream]
+        rule --> firehose[Kinesis Firehose → S3 Parquet]
+    end
+
+    subgraph Realtime Processing
+        kinesis --> lambda[Lambda Stream Processor\n(anomaly detect,\nOpenSearch index,\nalert SNS)]
+        lambda --> sns[SNS AlertTopic]
+        lambda --> os[OpenSearch Domain\nCognito Dashboards]
+    end
+
+    subgraph Lake & Analytics
+        firehose --> s3[(S3 iot-telemetry-raw\nPartitioned Parquet)]
+        s3 --> glue[Glue Crawler + Catalog]
+        glue --> athena[Athena Workgroup iot-wg]
+        athena --> qs[QuickSight Dashboards\nTrends / health / anomalies]
+    end
+
+    classDef vpc fill:#1f2937,stroke:#fff,color:#fff;
+    class lambda,os vpc;
+```

@@ -1,0 +1,41 @@
+{
+  "index_patterns": [
+    "iot-telemetry*"
+  ],
+  "priority": 100,
+  "template": {
+    "settings": {
+      "number_of_replicas": 1
+    },
+    "mappings": {
+      "properties": {
+        "device_id": {
+          "type": "keyword"
+        },
+        "ts": {
+          "type": "date",
+          "format": "date_time"
+        },
+        "ingested_at": {
+          "type": "date",
+          "format": "date_time"
+        },
+        "temp_c": {
+          "type": "float"
+        },
+        "humidity_pct": {
+          "type": "float"
+        },
+        "vibration_g": {
+          "type": "float"
+        },
+        "battery_pct": {
+          "type": "float"
+        },
+        "anomalies": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

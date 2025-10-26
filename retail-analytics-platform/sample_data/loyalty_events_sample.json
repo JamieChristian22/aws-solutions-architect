@@ -1,0 +1,11 @@
+{
+  "customer_id": "CUST8831",
+  "basket_id": "BASKET55322",
+  "items": [
+    "SKU9982",
+    "SKU3311",
+    "SKU7777"
+  ],
+  "total_spend": 42.5,
+  "channel": "in_store"
+}

@@ -1,0 +1,7 @@
+Environment,Service,Est. Monthly Cost ($),Notes
+Dev/Test,Lambda,5,"Light workloads, event-based"
+Dev/Test,S3,3,Low data volume
+Staging,Glue + Athena,45,ETL + query costs
+Production,Redshift Serverless,450,Scaled analytics workloads
+Production,QuickSight,120,5 user dashboards
+Production,GuardDuty + CloudWatch,85,Security & monitoring

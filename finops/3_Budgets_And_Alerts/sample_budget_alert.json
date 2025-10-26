@@ -1,0 +1,20 @@
+{
+    "Budget": {
+        "Name": "Prod-Monthly-Budget",
+        "Limit": 300,
+        "Notifications": [
+            {
+                "Threshold": 80,
+                "Action": "SNS Alert"
+            },
+            {
+                "Threshold": 100,
+                "Action": "SNS Alert"
+            },
+            {
+                "Threshold": 120,
+                "Action": "Email + SNS"
+            }
+        ]
+    }
+}

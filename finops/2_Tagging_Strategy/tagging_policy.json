@@ -1,0 +1,16 @@
+{
+    "Tags": {
+        "Owner": "JamieChristianII",
+        "Project": "AWS_Solutions_Portfolio",
+        "Environment": [
+            "Dev",
+            "Staging",
+            "Production"
+        ],
+        "CostCenter": "AWS-FinOps",
+        "Confidentiality": [
+            "Low",
+            "High"
+        ]
+    }
+}

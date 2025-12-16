@@ -1,0 +1,11 @@
+name: Terraform CI
+
+on: [push]
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Terraform Init
+        run: terraform init

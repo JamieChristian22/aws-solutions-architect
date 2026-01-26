@@ -8,13 +8,13 @@ Cloud Solutions Architect | AWS Consulting | Cost Optimization | Security & Well
 
 ## Repo Navigation (Start Here)
 
-- **🏥 Healthcare Data Platform (Flagship):** `healthcare-data-platform/`
-- **🛍️ Retail Analytics Platform:** `retail-analytics-platform/`
-- **🌐 Clickstream Analytics Platform:** `clickstream-analytics/`
-- **📡 IoT Sensor Analytics Platform:** `iot-sensor-analytics/`
-- **💰 FinOps artifacts:** `finops/`
-- **🧰 Reusable consulting artifacts:** `consulting-toolkit/`
-- **🎓 SA Pro roadmap:** `certifications/aws-professional-certification-roadmap.md`
+- **🏥 Healthcare Data Platform (Flagship):** [`healthcare-data-platform/`](./healthcare-data-platform/)
+- **🛍️ Retail Analytics Platform:** [`retail-analytics-platform/`](./retail-analytics-platform/)
+- **🌐 Clickstream Analytics Platform:** [`clickstream-analytics/`](./clickstream-analytics/)
+- **📡 IoT Sensor Analytics Platform:** [`iot-sensor-analytics/`](./iot-sensor-analytics/)
+- **💰 FinOps artifacts:** [`finops/`](./finops/)
+- **🧰 Reusable consulting artifacts:** [`consulting-toolkit/`](./consulting-toolkit/)
+- **🎓 SA Pro roadmap:** [`certifications/aws-professional-certification-roadmap.md`](./certifications/aws-professional-certification-roadmap.md)
 
 ---
 

@@ -14,7 +14,6 @@ Cloud Solutions Architect | AWS Consulting | Cost Optimization | Security & Well
 - **📡 IoT Sensor Analytics Platform:** [`iot-sensor-analytics/`](./iot-sensor-analytics/)
 - **💰 FinOps artifacts:** [`finops/`](./finops/)
 - **🧰 Reusable consulting artifacts:** [`consulting-toolkit/`](./consulting-toolkit/)
-- **🎓 SA Pro roadmap:** [`certifications/aws-professional-certification-roadmap.md`](./certifications/aws-professional-certification-roadmap.md)
 
 ---
 

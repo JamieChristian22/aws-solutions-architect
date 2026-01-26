@@ -1,6 +1,6 @@
 # ☁️ AWS Solutions Architect – Consulting Portfolio
 
-**Jamie Christian**  
+**Jamie Christian II**  
 Cloud Solutions Architect | AWS Consulting | Cost Optimization | Security & Well-Architected  
 📍 United States | 🌐 github.com/JamieChristian22
 

@@ -6,6 +6,18 @@ Cloud Solutions Architect | AWS Consulting | Cost Optimization | Security & Well
 
 ---
 
+## Repo Navigation (Start Here)
+
+- **🏥 Healthcare Data Platform (Flagship):** `healthcare-data-platform/`
+- **🛍️ Retail Analytics Platform:** `retail-analytics-platform/`
+- **🌐 Clickstream Analytics Platform:** `clickstream-analytics/`
+- **📡 IoT Sensor Analytics Platform:** `iot-sensor-analytics/`
+- **💰 FinOps artifacts:** `finops/`
+- **🧰 Reusable consulting artifacts:** `consulting-toolkit/`
+- **🎓 SA Pro roadmap:** `certifications/aws-professional-certification-roadmap.md`
+
+---
+
 ## Overview
 
 This repository represents **real-world AWS cloud consulting engagements** designed to help organizations align business goals with secure, scalable, and cost-optimized AWS architectures.
@@ -65,7 +77,7 @@ All projects follow a standardized consulting lifecycle:
 - Full Well-Architected review
 - Detailed LOE and delivery roadmap
 
-📁 `projects/healthcare-data-platform/`
+📁 `healthcare-data-platform/`
 
 ---
 
@@ -76,7 +88,7 @@ All projects follow a standardized consulting lifecycle:
 - Storage lifecycle optimization
 - Cost transparency for leadership
 
-📁 `projects/retail-analytics-platform/`
+📁 `retail-analytics-platform/`
 
 ---
 
@@ -87,7 +99,7 @@ All projects follow a standardized consulting lifecycle:
 - Elastic scaling for peak traffic
 - Performance-optimized analytics design
 
-📁 `projects/clickstream-analytics/`
+📁 `clickstream-analytics/`
 
 ---
 
@@ -98,7 +110,14 @@ All projects follow a standardized consulting lifecycle:
 - Fault-tolerant design
 - Operational monitoring strategy
 
-📁 `projects/iot-sensor-analytics/`
+📁 `iot-sensor-analytics/`
+
+---
+
+## FinOps
+Cost optimization guidance, checklists, and practical artifacts.
+
+📁 `finops/`
 
 ---
 
@@ -160,4 +179,3 @@ This portfolio aligns directly with the **AWS Certified Solutions Architect – 
 ---
 
 > This repository demonstrates the mindset, structure, and delivery quality expected of a **customer-facing Cloud Solutions Architect** operating in real consulting environments.
-

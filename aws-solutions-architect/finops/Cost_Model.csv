@@ -1,0 +1,11 @@
+ServiceGroup,Category,ModeledMonthlyUSD,Assumption
+ECS Fargate application,compute,9800,baseline modeled monthly workload
+RDS PostgreSQL Multi-AZ,database,6200,production HA database estimate
+NAT Gateways + processing,network,3100,two AZ egress pattern
+ALB,network,750,load balancer + request usage
+CloudFront,edge,1800,modeled CDN transfer/requests
+S3 app + logs,storage,1100,standard + lifecycle mix
+CloudWatch,observability,1400,logs/metrics/alarms
+Security services,security,1250,GuardDuty/Config/Security Hub modeled
+Backups/DR copies,resilience,1700,backup storage/cross-region copies
+Route53/WAF/KMS/Secrets,platform,900,platform services

@@ -1,0 +1,7 @@
+Optimization,EstimatedMonthlySavingsUSD
+Fargate rightsizing/autoscaling,1800
+Graviton-compatible workload migration,900
+RDS rightsizing after Performance Insights review,950
+S3/log lifecycle and retention tuning,420
+NAT traffic reduction via VPC endpoints,620
+Savings Plan after 30-day stable baseline,1100

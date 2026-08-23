@@ -1,0 +1,8 @@
+aws_region     = "us-east-1"
+dr_region      = "us-west-2"
+project_name   = "northstar-platform"
+environment    = "prod"
+vpc_cidr       = "10.40.0.0/16"
+db_name        = "northstar"
+db_username    = "northstar_admin"
+container_image = "public.ecr.aws/nginx/nginx:stable"

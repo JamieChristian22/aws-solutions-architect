@@ -1,0 +1,7 @@
+Optimization,ModeledMonthlySavingsUSD
+OpenSearch rightsizing / UltraWarm policy,700
+Parquet + partition pruning reduces Athena scans,210
+S3 lifecycle to Intelligent-Tiering/Glacier,120
+Lambda memory/duration tuning,140
+Kinesis capacity mode review after load testing,260
+Log retention tuning,90

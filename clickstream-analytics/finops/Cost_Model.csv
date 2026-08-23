@@ -1,0 +1,11 @@
+Component,ModeledMonthlyUSD
+API Gateway/WAF,1600
+Kinesis Data Streams,2400
+Lambda ingestion/processing,1100
+Firehose delivery/conversion,850
+S3 data lake,520
+Glue/Athena,480
+OpenSearch,3100
+CloudWatch/CloudTrail,620
+KMS/Secrets/Cognito/Route53,330
+Data transfer/misc,500

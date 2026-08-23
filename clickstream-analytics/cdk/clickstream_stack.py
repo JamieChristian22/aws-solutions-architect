@@ -1,220 +1,286 @@
-import aws_cdk as cdk
 from aws_cdk import (
-    Stack, Duration, RemovalPolicy,
-    aws_kms as kms,
-    aws_s3 as s3,
-    aws_lambda as _lambda,
+    Stack, Duration, RemovalPolicy, CfnOutput,
     aws_apigateway as apigw,
-    aws_wafv2 as wafv2,
-    aws_kinesis as kinesis,
-    aws_iam as iam,
-    aws_kinesisfirehose as firehose,
-    aws_kinesisfirehose_destinations as destinations,
-    aws_logs as logs,
+    aws_cloudwatch as cw,
     aws_ec2 as ec2,
+    aws_firehose as firehose,
     aws_glue as glue,
-    aws_athena as athena,
+    aws_iam as iam,
+    aws_kinesis as kinesis,
+    aws_kms as kms,
+    aws_lambda as _lambda,
+    aws_lambda_event_sources as event_sources,
+    aws_logs as logs,
     aws_opensearchservice as opensearch,
-    aws_secretsmanager as secrets,
-    aws_cognito as cognito
+    aws_s3 as s3,
+    aws_s3_deployment as s3deploy,
+    aws_sqs as sqs,
+    aws_wafv2 as wafv2,
 )
 from constructs import Construct
+from pathlib import Path
 
 class ClickstreamStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
-        # VPC with endpoints
-        vpc = ec2.Vpc(self, "Vpc",
-            ip_addresses=ec2.IpAddresses.cidr("10.20.0.0/16"),
-            nat_gateways=1, max_azs=2,
+        key = kms.Key(self, "DataKey", enable_key_rotation=True)
+
+        vpc = ec2.Vpc(
+            self, "AnalyticsVpc",
+            max_azs=2,
+            nat_gateways=1,
             subnet_configuration=[
                 ec2.SubnetConfiguration(name="public", subnet_type=ec2.SubnetType.PUBLIC, cidr_mask=24),
-                ec2.SubnetConfiguration(name="private", subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS, cidr_mask=24)
-            ]
+                ec2.SubnetConfiguration(name="private", subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS, cidr_mask=24),
+            ],
         )
-        vpc.add_gateway_endpoint("S3Endpoint", service=ec2.GatewayVpcEndpointAwsService.S3)
-        for i, svc in enumerate([
-            ec2.InterfaceVpcEndpointAwsService.KINESIS_STREAMS,
-            ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
-            ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH,
-            ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_EVENTS,
-            ec2.InterfaceVpcEndpointAwsService.STS,
-            ec2.InterfaceVpcEndpointAwsService.KINESIS_FIREHOSE,
-        ]):
-            vpc.add_interface_endpoint(f"Endpoint{i}", service=svc, subnets=ec2.SubnetSelection(subnets=vpc.private_subnets))
 
-        # KMS
-        data_key = kms.Key(self, "DataKey", alias="alias/clickstream-data", enable_key_rotation=True)
-
-        # S3 Buckets
-        processed = s3.Bucket(self, "Processed",
-            encryption=s3.BucketEncryption.KMS, encryption_key=data_key,
-            block_public_access=s3.BlockPublicAccess.BLOCK_ALL, enforce_ssl=True,
-            lifecycle_rules=[s3.LifecycleRule(expiration=Duration.days(365))],
-            auto_delete_objects=True, removal_policy=RemovalPolicy.DESTROY
+        stream = kinesis.Stream(
+            self, "EventStream",
+            stream_mode=kinesis.StreamMode.ON_DEMAND,
+            encryption=kinesis.StreamEncryption.KMS,
+            encryption_key=key,
+            retention_period=Duration.hours(48),
         )
-        bad = s3.Bucket(self, "Bad",
-            encryption=s3.BucketEncryption.KMS, encryption_key=data_key,
-            block_public_access=s3.BlockPublicAccess.BLOCK_ALL, enforce_ssl=True,
+
+        lake = s3.Bucket(
+            self, "ProcessedLake",
+            encryption=s3.BucketEncryption.KMS,
+            encryption_key=key,
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
+            versioned=True,
+            enforce_ssl=True,
+            lifecycle_rules=[
+                s3.LifecycleRule(
+                    id="curated-retention",
+                    enabled=True,
+                    transitions=[s3.Transition(storage_class=s3.StorageClass.INFREQUENT_ACCESS, transition_after=Duration.days(30))],
+                    expiration=Duration.days(395),
+                )
+            ],
+            removal_policy=RemovalPolicy.RETAIN,
+        )
+
+        error_bucket = s3.Bucket(
+            self, "ErrorBucket",
+            encryption=s3.BucketEncryption.KMS,
+            encryption_key=key,
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
+            enforce_ssl=True,
             lifecycle_rules=[s3.LifecycleRule(expiration=Duration.days(30))],
-            auto_delete_objects=True, removal_policy=RemovalPolicy.DESTROY
+            removal_policy=RemovalPolicy.RETAIN,
         )
 
-        # Kinesis
-        stream = kinesis.Stream(self, "EventStream",
-            shard_count=1, stream_mode=kinesis.StreamMode.PROVISIONED,
-            encryption=kinesis.StreamEncryption.KMS, encryption_key=data_key,
-            retention_period=Duration.hours(24)
+        dlq = sqs.Queue(
+            self, "ProcessorDlq",
+            encryption=sqs.QueueEncryption.KMS,
+            encryption_master_key=key,
+            retention_period=Duration.days(14),
         )
 
-        # Ingest Lambda (public)
-        ingest = _lambda.Function(self, "IngestFn",
-            runtime=_lambda.Runtime.PYTHON_3_11, handler="index.handler",
+        # Glue catalog/table for Parquet lake.
+        database = glue.CfnDatabase(
+            self, "GlueDatabase",
+            catalog_id=self.account,
+            database_input=glue.CfnDatabase.DatabaseInputProperty(name="clickstream"),
+        )
+
+        table = glue.CfnTable(
+            self, "GlueTable",
+            catalog_id=self.account,
+            database_name="clickstream",
+            table_input=glue.CfnTable.TableInputProperty(
+                name="events",
+                table_type="EXTERNAL_TABLE",
+                parameters={"classification":"parquet"},
+                partition_keys=[
+                    glue.CfnTable.ColumnProperty(name="event_date", type="string"),
+                    glue.CfnTable.ColumnProperty(name="event_hour", type="string"),
+                ],
+                storage_descriptor=glue.CfnTable.StorageDescriptorProperty(
+                    location=f"s3://{lake.bucket_name}/events/",
+                    input_format="org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+                    output_format="org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+                    serde_info=glue.CfnTable.SerdeInfoProperty(
+                        serialization_library="org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
+                    ),
+                    columns=[
+                        glue.CfnTable.ColumnProperty(name="event_id",type="string"),
+                        glue.CfnTable.ColumnProperty(name="event_time",type="timestamp"),
+                        glue.CfnTable.ColumnProperty(name="session_id",type="string"),
+                        glue.CfnTable.ColumnProperty(name="anonymous_id",type="string"),
+                        glue.CfnTable.ColumnProperty(name="user_id",type="string"),
+                        glue.CfnTable.ColumnProperty(name="event_type",type="string"),
+                        glue.CfnTable.ColumnProperty(name="page_url",type="string"),
+                        glue.CfnTable.ColumnProperty(name="device_type",type="string"),
+                        glue.CfnTable.ColumnProperty(name="source",type="string"),
+                        glue.CfnTable.ColumnProperty(name="revenue",type="double"),
+                    ],
+                ),
+            ),
+        )
+        table.add_dependency(database)
+
+        firehose_role = iam.Role(
+            self, "FirehoseRole",
+            assumed_by=iam.ServicePrincipal("firehose.amazonaws.com"),
+        )
+        lake.grant_read_write(firehose_role)
+        error_bucket.grant_read_write(firehose_role)
+        key.grant_encrypt_decrypt(firehose_role)
+
+        delivery = firehose.CfnDeliveryStream(
+            self, "DeliveryStream",
+            delivery_stream_type="DirectPut",
+            extended_s3_destination_configuration=firehose.CfnDeliveryStream.ExtendedS3DestinationConfigurationProperty(
+                bucket_arn=lake.bucket_arn,
+                role_arn=firehose_role.role_arn,
+                prefix="events/event_date=!{timestamp:yyyy-MM-dd}/event_hour=!{timestamp:HH}/",
+                error_output_prefix="errors/!{firehose:error-output-type}/",
+                buffering_hints=firehose.CfnDeliveryStream.BufferingHintsProperty(interval_in_seconds=300,size_in_m_bs=64),
+                compression_format="GZIP",
+                encryption_configuration=firehose.CfnDeliveryStream.EncryptionConfigurationProperty(
+                    kms_encryption_config=firehose.CfnDeliveryStream.KMSEncryptionConfigProperty(awskms_key_arn=key.key_arn)
+                ),
+            ),
+        )
+
+        ingest = _lambda.Function(
+            self, "IngestFunction",
+            runtime=_lambda.Runtime.PYTHON_3_11,
+            handler="handler.handler",
             code=_lambda.Code.from_asset("../lambda/ingest"),
-            memory_size=256, timeout=Duration.seconds(10),
-            environment={"STREAM_NAME": stream.stream_name, "BAD_BUCKET": bad.bucket_name, "ALLOW_ORIGINS":"https://localhost,https://example.com"},
-            log_retention=logs.RetentionDays.ONE_WEEK
+            timeout=Duration.seconds(10),
+            memory_size=256,
+            environment={"STREAM_NAME": stream.stream_name},
+            log_retention=logs.RetentionDays.ONE_MONTH,
         )
-        stream.grant_write(ingest); bad.grant_write(ingest)
+        stream.grant_write(ingest)
 
-        # API Gateway + WAF
-        api = apigw.RestApi(self, "Api", deploy_options=apigw.StageOptions(stage_name="prod", logging_level=apigw.MethodLoggingLevel.INFO))
-        api.root.add_resource("events").add_method("POST", apigw.LambdaIntegration(ingest), api_key_required=False)
-        web_acl = wafv2.CfnWebACL(self, "ApiWaf",
+        domain = opensearch.Domain(
+            self, "SearchDomain",
+            version=opensearch.EngineVersion.OPENSEARCH_2_13,
+            vpc=vpc,
+            vpc_subnets=[ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS)],
+            capacity=opensearch.CapacityConfig(data_nodes=2, data_node_instance_type="t3.small.search"),
+            ebs=opensearch.EbsOptions(enabled=True, volume_size=50),
+            node_to_node_encryption=True,
+            encryption_at_rest=opensearch.EncryptionAtRestOptions(enabled=True,kms_key=key),
+            enforce_https=True,
+            zone_awareness=opensearch.ZoneAwarenessConfig(enabled=True,availability_zone_count=2),
+            removal_policy=RemovalPolicy.RETAIN,
+        )
+
+        processor = _lambda.Function(
+            self, "ProcessorFunction",
+            runtime=_lambda.Runtime.PYTHON_3_11,
+            handler="handler.handler",
+            code=_lambda.Code.from_asset("../lambda/processor"),
+            timeout=Duration.seconds(60),
+            memory_size=1024,
+            environment={
+                "DELIVERY_STREAM": delivery.ref,
+                "OS_HOST": domain.domain_endpoint,
+                "OS_INDEX": "clickstream-events",
+            },
+            vpc=vpc,
+            log_retention=logs.RetentionDays.ONE_MONTH,
+            dead_letter_queue=dlq,
+        )
+        processor.add_event_source(
+            event_sources.KinesisEventSource(
+                stream,
+                starting_position=_lambda.StartingPosition.LATEST,
+                batch_size=200,
+                bisect_batch_on_error=True,
+                retry_attempts=5,
+                parallelization_factor=2,
+                report_batch_item_failures=True,
+            )
+        )
+        processor.add_to_role_policy(iam.PolicyStatement(
+            actions=["firehose:PutRecord","firehose:PutRecordBatch"],
+            resources=[delivery.attr_arn],
+        ))
+        domain.grant_write(processor)
+        key.grant_encrypt_decrypt(processor)
+
+        api = apigw.RestApi(
+            self, "EventApi",
+            deploy_options=apigw.StageOptions(
+                stage_name="prod",
+                throttling_rate_limit=6000,
+                throttling_burst_limit=10000,
+                metrics_enabled=True,
+                logging_level=apigw.MethodLoggingLevel.ERROR,
+            ),
+        )
+        events_resource = api.root.add_resource("events")
+        events_resource.add_method("POST", apigw.LambdaIntegration(ingest))
+
+        web_acl = wafv2.CfnWebACL(
+            self, "WebAcl",
+            scope="REGIONAL",
             default_action=wafv2.CfnWebACL.DefaultActionProperty(allow={}),
-            scope="REGIONAL", name="clickstream-api-waf",
             visibility_config=wafv2.CfnWebACL.VisibilityConfigProperty(
-                cloud_watch_metrics_enabled=True, metric_name="api-waf", sampled_requests_enabled=True
+                cloud_watch_metrics_enabled=True,
+                metric_name="clickstream-web-acl",
+                sampled_requests_enabled=True,
             ),
             rules=[
                 wafv2.CfnWebACL.RuleProperty(
-                    name="AWSManagedCommon", priority=1,
+                    name="AWSManagedCommon",
+                    priority=0,
+                    override_action=wafv2.CfnWebACL.OverrideActionProperty(none={}),
                     statement=wafv2.CfnWebACL.StatementProperty(
                         managed_rule_group_statement=wafv2.CfnWebACL.ManagedRuleGroupStatementProperty(
-                            vendor_name="AWS", name="AWSManagedRulesCommonRuleSet"
+                            name="AWSManagedRulesCommonRuleSet",
+                            vendor_name="AWS",
                         )
                     ),
                     visibility_config=wafv2.CfnWebACL.VisibilityConfigProperty(
-                        cloud_watch_metrics_enabled=True, metric_name="common", sampled_requests_enabled=True
+                        cloud_watch_metrics_enabled=True,
+                        metric_name="common-rules",
+                        sampled_requests_enabled=True,
                     ),
-                    override_action=wafv2.CfnWebACL.OverrideActionProperty(none={})
-                )
-            ]
-        )
-        wafv2.CfnWebACLAssociation(self, "ApiWafAssoc", resource_arn=api.deployment_stage.stage_arn, web_acl_arn=web_acl.attr_arn)
-
-        # Firehose -> S3
-        fh_role = iam.Role(self, "FirehoseRole", assumed_by=iam.ServicePrincipal("firehose.amazonaws.com"))
-        processed.grant_read_write(fh_role); data_key.grant_encrypt_decrypt(fh_role)
-        delivery = firehose.DeliveryStream(self, "Delivery",
-            destinations=[
-                destinations.S3Bucket(processed,
-                    buffering_interval=Duration.seconds(60),
-                    data_output_prefix="year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/",
-                    error_output_prefix="errors/!{firehose:error-output-type}/",
-                    compression=destinations.Compression.GZIP,
-                    logging=True,
-                    role=fh_role
-                )
-            ],
-            encryption=firehose.StreamEncryption.KMS, encryption_key=data_key
-        )
-
-        # Glue + Crawler
-        db = glue.CfnDatabase(self, "Db", catalog_id=self.account, database_input=glue.CfnDatabase.DatabaseInputProperty(name="clickstream"))
-        crawler_role = iam.Role(self, "CrawlerRole", assumed_by=iam.ServicePrincipal("glue.amazonaws.com"))
-        crawler_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSGlueServiceRole"))
-        processed.grant_read(crawler_role)
-        glue.CfnCrawler(self, "Crawler",
-            role=crawler_role.role_arn, database_name=db.ref, name="clickstream-processed-crawler",
-            targets=glue.CfnCrawler.TargetsProperty(s3_targets=[glue.CfnCrawler.S3TargetProperty(path=f"s3://{processed.bucket_name}/")]),
-            schema_change_policy=glue.CfnCrawler.SchemaChangePolicyProperty(delete_behavior="LOG", update_behavior="UPDATE_IN_DATABASE")
-        )
-
-        # Athena WorkGroup + results bucket
-        results = s3.Bucket(self, "AthenaResults",
-            enforce_ssl=True, block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
-            lifecycle_rules=[s3.LifecycleRule(expiration=Duration.days(90))],
-            auto_delete_objects=True, removal_policy=RemovalPolicy.DESTROY
-        )
-        athena.CfnWorkGroup(self, "WG",
-            name="clickstream-wg", state="ENABLED",
-            work_group_configuration=athena.CfnWorkGroup.WorkGroupConfigurationProperty(
-                enforce_work_group_configuration=True,
-                result_configuration=athena.CfnWorkGroup.ResultConfigurationProperty(
-                    output_location=f"s3://{results.bucket_name}/results/"
                 ),
-                publish_cloud_watch_metrics_enabled=True
-            )
+                wafv2.CfnWebACL.RuleProperty(
+                    name="RateLimit",
+                    priority=1,
+                    action=wafv2.CfnWebACL.RuleActionProperty(block={}),
+                    statement=wafv2.CfnWebACL.StatementProperty(
+                        rate_based_statement=wafv2.CfnWebACL.RateBasedStatementProperty(limit=12000,aggregate_key_type="IP")
+                    ),
+                    visibility_config=wafv2.CfnWebACL.VisibilityConfigProperty(
+                        cloud_watch_metrics_enabled=True,
+                        metric_name="rate-limit",
+                        sampled_requests_enabled=True,
+                    ),
+                ),
+            ],
         )
 
-        # Cognito + OpenSearch
-        user_pool = cognito.UserPool(self, "UserPool", self_sign_up_enabled=True,
-                                     sign_in_aliases=cognito.SignInAliases(email=True))
-        user_pool_client = user_pool.add_client("UserPoolClient", auth_flows=cognito.AuthFlow(user_srp=True))
-        identity_pool = cognito.CfnIdentityPool(self, "IdentityPool",
-            allow_unauthenticated_identities=False,
-            cognito_identity_providers=[cognito.CfnIdentityPool.CognitoIdentityProviderProperty(
-                client_id=user_pool_client.user_pool_client_id,
-                provider_name=user_pool.user_pool_provider_name
-            )]
+        wafv2.CfnWebACLAssociation(
+            self, "ApiWafAssociation",
+            resource_arn=f"arn:aws:apigateway:{self.region}::/restapis/{api.rest_api_id}/stages/prod",
+            web_acl_arn=web_acl.attr_arn,
         )
 
-        os_sg = ec2.SecurityGroup(self, "OpenSearchSG", vpc=vpc, allow_all_outbound=True)
-        for subnet in vpc.private_subnets:
-            os_sg.add_ingress_rule(ec2.Peer.ipv4(subnet.ipv4_cidr_block), ec2.Port.tcp(443), "Private subnets to OS")
-
-        master_secret = secrets.Secret(self, "OSMasterSecret",
-            generate_secret_string=secrets.SecretStringGenerator(
-                secret_string_template='{"username":"master-user"}', generate_string_key="password"
-            )
+        cw.Alarm(
+            self, "IteratorAgeAlarm",
+            metric=stream.metric_get_records_iterator_age_milliseconds(period=Duration.minutes(1)),
+            threshold=60000,
+            evaluation_periods=3,
+        )
+        cw.Alarm(
+            self, "ProcessorErrorsAlarm",
+            metric=processor.metric_errors(period=Duration.minutes(5)),
+            threshold=5,
+            evaluation_periods=2,
         )
 
-        domain = opensearch.Domain(self, "OpenSearch",
-            version=opensearch.EngineVersion.OPENSEARCH_2_13,
-            vpc=vpc, vpc_subnets=[ec2.SubnetSelection(subnets=vpc.private_subnets)], security_groups=[os_sg],
-            capacity=opensearch.CapacityConfig(data_nodes=2, data_node_instance_type="t3.small.search"),
-            ebs=opensearch.EbsOptions(volume_size=20),
-            node_to_node_encryption=True,
-            encryption_at_rest=opensearch.EncryptionAtRestOptions(enabled=True),
-            enforce_https=True,
-            fine_grained_access_control=opensearch.AdvancedSecurityOptions(
-                master_user_name="master-user",
-                master_user_password=master_secret.secret_value_from_json("password")
-            ),
-            cognito_dashboards_auth=opensearch.CognitoOptions(
-                identity_pool_id=identity_pool.ref,
-                user_pool_id=user_pool.user_pool_id,
-                user_pool_client_id=user_pool_client.user_pool_client_id
-            ),
-            removal_policy=RemovalPolicy.DESTROY
-        )
-
-        # Stream Processor (in VPC) — dual write: Firehose + OpenSearch
-        sp = _lambda.Function(self, "StreamProcessor",
-            runtime=_lambda.Runtime.PYTHON_3_11, handler="index.handler",
-            code=_lambda.Code.from_asset("../lambda/stream_processor"),
-            memory_size=512, timeout=Duration.seconds(30),
-            vpc=vpc, vpc_subnets=ec2.SubnetSelection(subnets=vpc.private_subnets),
-            environment={
-                "FIREHOSE_NAME": delivery.delivery_stream_name,
-                "OS_ENDPOINT": domain.domain_endpoint,
-                "OS_INDEX": "clickstream-events",
-                "OS_SECRET_ARN": master_secret.secret_arn,
-            }
-        )
-        stream.grant_read(sp); delivery.grant_put_records(sp)
-        master_secret.grant_read(sp)
-        sp.add_event_source_mapping("KinesisSource",
-            event_source_arn=stream.stream_arn, batch_size=100, starting_position=_lambda.StartingPosition.LATEST,
-            bisect_batch_on_error=True
-        )
-
-        # Outputs
-        cdk.CfnOutput(self, "ApiUrl", value=api.url_for_path("/events"))
-        cdk.CfnOutput(self, "KinesisStreamName", value=stream.stream_name)
-        cdk.CfnOutput(self, "ProcessedBucketName", value=processed.bucket_name)
-        cdk.CfnOutput(self, "OpenSearchEndpoint", value=domain.domain_endpoint)
-        cdk.CfnOutput(self, "CognitoUserPoolId", value=user_pool.user_pool_id)
-        cdk.CfnOutput(self, "CognitoIdentityPoolId", value=identity_pool.ref)
+        CfnOutput(self, "ApiUrl", value=api.url_for_path("/events"))
+        CfnOutput(self, "KinesisStreamName", value=stream.stream_name)
+        CfnOutput(self, "ProcessedBucketName", value=lake.bucket_name)
+        CfnOutput(self, "OpenSearchEndpoint", value=domain.domain_endpoint)

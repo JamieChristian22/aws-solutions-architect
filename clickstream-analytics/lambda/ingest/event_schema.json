@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StreamPulseClickstreamEvent",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_time",
+    "session_id",
+    "event_type",
+    "anonymous_id",
+    "page_url"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 64
+    },
+    "event_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 64
+    },
+    "anonymous_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 64
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "page_view",
+        "product_view",
+        "add_to_cart",
+        "checkout_start",
+        "purchase",
+        "search",
+        "feature_use"
+      ]
+    },
+    "page_url": {
+      "type": "string",
+      "maxLength": 2048
+    },
+    "referrer": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 2048
+    },
+    "device_type": {
+      "type": "string",
+      "enum": [
+        "desktop",
+        "mobile",
+        "tablet"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "campaign": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 128
+    },
+    "revenue": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "properties": {
+      "type": "object",
+      "maxProperties": 20
+    }
+  }
+}

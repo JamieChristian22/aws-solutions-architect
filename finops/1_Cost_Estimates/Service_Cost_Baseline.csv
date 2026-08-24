@@ -1,0 +1,10 @@
+Service,MonthlyUSD
+EC2/ECS,18500
+RDS/Aurora,12400
+S3,3900
+NAT/Data Transfer,4200
+OpenSearch,6100
+CloudWatch,2300
+Lambda/API,1800
+Backups,2100
+Other,2700

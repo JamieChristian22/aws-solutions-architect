@@ -1,0 +1,5 @@
+ReviewDate,Topic,Decision,Owner,Status
+2026-08-01,Tag compliance,Enforce required tag set,FinOps,Approved
+2026-08-08,OpenSearch cost,Move older indexes to warm tier,Platform,Approved
+2026-08-15,Commitment purchase,Defer pending rightsizing,Finance,Deferred
+2026-08-22,Storage lifecycle,Approve 30/90 day transitions,Platform,Approved

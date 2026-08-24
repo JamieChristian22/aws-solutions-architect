@@ -1,0 +1,5 @@
+ResourceType,Environment,Application,Owner,CostCenter,BusinessUnit,ManagedBy,DataClassification
+EC2,Required,Required,Required,Required,Required,Required,Required
+RDS,Required,Required,Required,Required,Required,Required,Required
+S3,Required,Required,Required,Required,Required,Required,Required
+Lambda,Required,Required,Required,Required,Required,Required,Required

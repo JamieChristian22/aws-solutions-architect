@@ -1,0 +1,12 @@
+{
+  "thresholds": [
+    50,
+    80,
+    100,
+    110
+  ],
+  "channels": [
+    "finops-alerts",
+    "service-owner"
+  ]
+}

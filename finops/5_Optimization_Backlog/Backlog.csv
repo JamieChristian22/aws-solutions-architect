@@ -1,0 +1,9 @@
+ID,Action,MonthlySavingsUSD,Effort,Risk,Owner,Priority
+FO-01,Compute rightsizing,2590.0,Medium,Low,Platform,High
+FO-02,Graviton migration,1080.0,Medium,Low,Platform,High
+FO-03,RDS rightsizing,1240.0,Medium,Low,Platform,High
+FO-04,S3 lifecycle,702.0,Medium,Low,Platform,High
+FO-05,NAT reduction/VPC endpoints,630.0,Medium,Low,Platform,High
+FO-06,OpenSearch tiering,976.0,Medium,Low,Platform,High
+FO-07,Log retention,460.0,Low,Low,Platform,High
+FO-08,Unused resources,1050.0,Low,Low,Platform,High

@@ -1,0 +1,1 @@
+SELECT device_id,site_id,MAX(event_time) last_seen FROM iot_telemetry GROUP BY device_id,site_id;

@@ -1,0 +1,1 @@
+SELECT site_id,a anomaly,COUNT(*) cnt FROM iot_telemetry CROSS JOIN UNNEST(anomalies) t(a) GROUP BY site_id,a ORDER BY cnt DESC;

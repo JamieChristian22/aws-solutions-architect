@@ -1,0 +1,7 @@
+Optimization,ModeledMonthlySavingsUSD
+OpenSearch rightsizing,420
+Parquet/partition pruning,80
+S3 lifecycle,35
+Lambda tuning,45
+Kinesis mode review,90
+Log retention,30

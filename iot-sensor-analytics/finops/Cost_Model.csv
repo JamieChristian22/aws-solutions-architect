@@ -1,0 +1,11 @@
+Component,ModeledMonthlyUSD
+AWS IoT Core,980
+Kinesis,1100
+Lambda,420
+Firehose,310
+S3,180
+OpenSearch,1650
+Glue/Athena,220
+CloudWatch/SNS/CloudTrail,260
+KMS/Secrets,90
+Misc,140

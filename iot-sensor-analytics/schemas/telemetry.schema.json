@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "device_id",
+    "site_id",
+    "event_time",
+    "sequence_number",
+    "temperature_c",
+    "humidity_pct",
+    "vibration_mm_s",
+    "battery_pct",
+    "firmware_version"
+  ],
+  "properties": {
+    "device_id": {
+      "type": "string"
+    },
+    "site_id": {
+      "type": "string"
+    },
+    "event_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sequence_number": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "temperature_c": {
+      "type": "number",
+      "minimum": -80,
+      "maximum": 200
+    },
+    "humidity_pct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "vibration_mm_s": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "battery_pct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "firmware_version": {
+      "type": "string"
+    },
+    "pressure_kpa": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "motor_rpm": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    }
+  }
+}

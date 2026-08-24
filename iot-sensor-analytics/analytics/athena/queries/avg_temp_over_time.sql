@@ -1,0 +1,1 @@
+SELECT event_date,site_id,AVG(temperature_c) avg_temp FROM iot_telemetry GROUP BY event_date,site_id;

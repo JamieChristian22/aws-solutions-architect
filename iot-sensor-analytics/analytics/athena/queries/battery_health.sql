@@ -1,0 +1,1 @@
+SELECT device_id,site_id,MIN(battery_pct) min_battery FROM iot_telemetry GROUP BY device_id,site_id HAVING MIN(battery_pct)<20;

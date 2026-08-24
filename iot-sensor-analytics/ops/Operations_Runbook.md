@@ -1,0 +1,2 @@
+# Operations Runbook
+For silent device: check last-seen, rejected IoT connections, cert status, site network, then fleet pipeline. For Kinesis backlog: inspect Lambda and downstreams, scale within limits, preserve lake delivery. For alert storm: group by site/firmware, validate thresholds, add dedup/cooldown only with owner approval. Monthly: cert expiry, offline devices, cost, Athena scans, alert quality, firmware/anomaly review.

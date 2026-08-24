@@ -1,0 +1,9 @@
+Domain,Score_1_to_5,Target,Priority
+Governance,2,4,High
+Security,3,5,High
+Reliability,2,4,High
+Operations,2,4,High
+Automation,2,5,High
+FinOps,2,4,Medium
+Data,3,4,Medium
+Delivery,3,5,High

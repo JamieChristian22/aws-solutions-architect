@@ -1,31 +1,41 @@
-# 🧰 Consulting Toolkit (Reusable Artifacts)
+# 🧰 AWS Cloud Consulting Toolkit — 10/10 Professional Services Edition
 
-This folder contains reusable, **real consulting artifacts** you can copy into any AWS engagement.  
-Everything is written to be client-ready and **drop-in** for discovery, assessment, design, delivery, FinOps, and handover.
+A reusable, client-ready AWS consulting system covering the complete engagement lifecycle:
 
-## Structure
-- **00_intake/** — discovery + current-state intake assets
-- **01_assessment/** — Well-Architected + security + cost + maturity assessments
-- **02_design/** — ADRs, HLD/LLD, threat modeling, diagram standards
-- **03_delivery/** — project plan, RAID log, ceremonies, change management
-- **04_finops/** — FinOps playbook, tagging standard, savings estimation worksheet
-- **05_handover/** — runbooks, ops acceptance, knowledge transfer plan
-- **06_presales/** — SOW template, LOE estimator, executive one-pager
+**intake → discovery → assessment → architecture → delivery → FinOps → operational handoff → presales → executive closeout**
 
-> Tip: Start every engagement by copying `00_intake/` + `01_assessment/` into the client project folder.  
-> Then create an `artifacts/` folder in the project and track decisions in ADRs as you go.
+This toolkit is built for Solutions Architect, Cloud Consultant, Technical Account, and Professional Services interviews. Every artifact is fully populated with realistic content and can be copied into a new engagement.
 
-## How to Use (Fast)
-1. Send the **Client Intake Questionnaire** (00_intake) before the first workshop.
-2. Run a 60–90 min **Discovery Workshop** using the agenda.
-3. Use the **Well-Architected Checklist** (01_assessment) to score each pillar.
-4. Document decisions in **ADR** (02_design) as tradeoffs are made.
-5. Track risks/issues/dependencies in **RAID Log** (03_delivery).
-6. Deliver **FinOps quick wins** using the playbook + worksheet (04_finops).
-7. Close with **Runbooks + Ops Acceptance** (05_handover).
+## Engagement Lifecycle
 
-— Jamie Christian II
+| Phase | Core Outputs |
+|---|---|
+| Intake | client questionnaire, stakeholder map, discovery agenda |
+| Assessment | Well-Architected review, security review, maturity score, cost baseline |
+| Design | HLD, LLD, ADRs, threat model, requirements traceability |
+| Delivery | project plan, RAID log, change log, decision log, status report |
+| FinOps | cost model, savings backlog, tagging standard, review cadence |
+| Handover | runbook, operational acceptance, knowledge transfer |
+| Presales | SOW, LOE, executive one-pager, assumptions |
+| Example Engagement | completed Northstar migration/modernization case |
 
+## Quality Standard
 
-## ⭐ New: Example End-to-End Engagement
-A fully completed sample engagement is included under `07_example_engagement/` with filled artifacts, executive summary, diagram, and deck.
+Every engagement should be able to answer:
+1. What business problem are we solving?
+2. What are the measurable success criteria?
+3. What architecture decisions were made and why?
+4. What risks remain?
+5. How is security enforced?
+6. How is reliability tested?
+7. How much will it cost?
+8. How will operations own it?
+9. What evidence proves acceptance?
+
+## Skills Demonstrated
+AWS Professional Services • Discovery • Well-Architected • Security Assessment • Architecture Design • ADRs • Threat Modeling • RAID • SOW • LOE • FinOps • Operations • Executive Communication • Customer Handoff
+
+## Verification Evidence
+
+The `evidence/` folder provides additional review-ready artifacts that demonstrate traceability, control validation, operational acceptance, and modeled test evidence. Any benchmark, cost, DR, or execution result that was not run against a live AWS account is explicitly labeled as **simulated**, **modeled**, or **planning evidence** rather than presented as production proof.
+

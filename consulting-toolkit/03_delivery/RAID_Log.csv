@@ -1,0 +1,6 @@
+Type,ID,Description,Impact,Owner,Status,Mitigation
+Risk,R-01,Regional outage,High,Platform,Open,DR plan and exercises
+Risk,R-02,Overbroad IAM,High,Security,Open,Role redesign
+Assumption,A-01,Primary region remains us-east-1,Medium,Sponsor,Accepted,Documented in HLD
+Issue,I-01,Incomplete cost tags,Medium,Finance,Open,Tagging remediation
+Dependency,D-01,Identity provider integration,High,Security,Open,Complete before production

@@ -1,0 +1,6 @@
+Action,BaselineMonthlyUSD,SavingsPct,MonthlySavingsUSD,AnnualSavingsUSD,Effort
+Compute rightsizing,12000,15,1800,21600,Medium
+Storage lifecycle,3500,18,630,7560,Low
+Graviton migration,8000,12,960,11520,Medium
+Commitment plan,10000,18,1800,21600,Medium
+Unused resource cleanup,2500,40,1000,12000,Low

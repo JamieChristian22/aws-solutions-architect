@@ -1,0 +1,7 @@
+BusinessNeed,Deliverable,EvidenceFile,AcceptanceStatus
+Secure cloud modernization,Security assessment,01_assessment/Security_Assessment.md,Complete
+Repeatable delivery,Architecture/IaC principles,02_design/High_Level_Design.md,Complete
+Recovery readiness,Traceability + runbook,02_design/Requirements_Traceability.md,Complete
+Cost governance,FinOps playbook,04_finops/FinOps_Playbook.md,Complete
+Operational handoff,Operations runbook,05_handover/Operations_Runbook.md,Complete
+Commercial clarity,SOW + LOE,06_presales/Statement_of_Work.md,Complete

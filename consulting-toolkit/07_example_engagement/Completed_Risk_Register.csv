@@ -1,0 +1,5 @@
+ID,Risk,Likelihood,Impact,Response,Owner
+R1,Region outage,Low,High,Warm standby DR,Platform
+R2,Credential misuse,Medium,High,Federation and scoped roles,Security
+R3,Cost spike,Medium,Medium,Budgets/anomaly detection,Finance
+R4,Bad deployment,Medium,High,CI plan/review/rollback,Engineering

@@ -1,0 +1,10 @@
+Workstream,SA_Hours,Engineer_Hours,Security_Hours
+Discovery,16,8,4
+Assessment,24,12,12
+Architecture,32,16,8
+IaC,16,60,8
+Security,16,24,28
+Observability,8,20,4
+DR,16,24,6
+FinOps,8,12,2
+Handoff,16,12,4

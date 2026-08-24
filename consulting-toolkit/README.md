@@ -1,4 +1,4 @@
-# 🧰 AWS Cloud Consulting Toolkit — 10/10 Professional Services Edition
+# 🧰 AWS Cloud Consulting Toolkit — Professional Services Edition
 
 A reusable, client-ready AWS consulting system covering the complete engagement lifecycle:
 

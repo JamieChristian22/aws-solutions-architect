@@ -1,0 +1,10 @@
+Component,ModeledMonthlyUSD
+S3/Glacier,1900
+Glue,2600
+Athena,1800
+Redshift Serverless,5200
+QuickSight,1400
+Security/Logging,2300
+Data Transfer,1100
+Lambda/API,1200
+Backups/DR,900

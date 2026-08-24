@@ -1,0 +1,10 @@
+Component,ModeledMonthlyUSD
+Kinesis/API,1600
+S3,1100
+Glue,2200
+Athena,900
+Redshift Serverless,4200
+QuickSight,900
+Security/Logs,900
+DR/Backups,700
+Data Transfer,700

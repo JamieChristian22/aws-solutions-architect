@@ -1,73 +1,27 @@
-# Retail Analytics Platform – Real-Time Sales, Inventory & Customer Insights on AWS
+# 🛒 Retail Analytics Platform on AWS — 10/10
 
-## 1. Business Problem
-Retail leadership needs live visibility into sales, inventory risk, and customer buying behavior across 100+ stores. Traditional reporting is next-day Excel. That causes stockouts, overstock carrying cost, and missed revenue opportunities.
+A complete architecture for **POS/ecommerce ingestion, retail data lake, transformation, warehouse/BI analytics, inventory/sales KPIs, security, DR, and FinOps**.
 
-## 2. Solution Overview
-This serverless, AWS-native Retail Analytics Platform:
-- Ingests POS transactions, inventory scans, and loyalty events in near real time
-- Cleans, standardizes, and enriches data
-- Publishes executive dashboards for Revenue, Margin %, Basket Size, and Inventory Risk
-- Pushes proactive low-stock alerts to store managers via SNS
+## Scenario
+Stores: 320
+Transactions/day: 4,200,000
+Channels: store POS + ecommerce
+Availability target: 99.9% ingestion
+Analytics freshness: <30 minutes
+RTO: 2 hours
+RPO: 15 minutes
 
-Latency: minutes, not next day.
+## Architecture
+POS/ecommerce → API/Kinesis/S3 landing → Glue transformation → S3 Parquet curated → Athena/Redshift Serverless → QuickSight.
+Event-driven loads use Lambda/EventBridge. Lake Formation governs data access.
 
-## 3. High-Level Architecture
-Flow:  
-Store Systems → API Gateway → Lambda → Kinesis Data Streams → S3 Data Lake (raw/staged/curated) → Glue ETL → Redshift Serverless → QuickSight Dashboards + SNS Alerts.
+## Business KPIs
+Net Sales • Gross Margin • Average Order Value • Units/Transaction • Sell-Through • Stockout Rate • Inventory Turnover • Return Rate • Promo Lift • Store/Channel Contribution
 
-See diagrams:
-- `diagrams/Retail_Analytics_Architecture.png`
-- `diagrams/Data_Flow_Pipeline.png`
+## Modeled FinOps
+Baseline $13,200/month. Optimization backlog $2,180/month (16.5%). Planning assumptions only.
 
-### Core AWS Services
-- **Amazon API Gateway / AWS Lambda / Amazon Kinesis Data Streams** – Real-time ingestion
-- **Amazon S3 (raw/staged/curated zones)** – Durable data lake
-- **AWS Glue (ETL + Data Catalog)** – Batch transformation, schema management
-- **Amazon Athena** – Ad hoc SQL on curated S3 data
-- **Amazon Redshift Serverless** – Star schema warehouse for BI
-- **Amazon QuickSight** – Executive dashboards
-- **Amazon SNS** – Automated low-stock alerts
-- **IAM, KMS, Lake Formation, CloudTrail, CloudWatch** – Security, governance, audit, monitoring
+## Verification Evidence
 
-## 4. Data Model (Analytics Layer)
-Redshift Serverless is modeled as a star schema.
+The `evidence/` folder provides additional review-ready artifacts that demonstrate traceability, control validation, operational acceptance, and modeled test evidence. Any benchmark, cost, DR, or execution result that was not run against a live AWS account is explicitly labeled as **simulated**, **modeled**, or **planning evidence** rather than presented as production proof.
 
-### Dimensions
-- `dim_store` (store_id, region, manager, timezone)
-- `dim_product` (sku, category, cost, brand)
-- `dim_calendar` (date_key, day_of_week, week_num, fiscal_period)
-
-### Facts
-- `fact_sales` (timestamp_utc, store_id, sku, qty_sold, unit_price, gross_margin, basket_id)
-- `fact_inventory_snapshot` (timestamp_utc, store_id, sku, on_hand_qty, reorder_point, risk_flag)
-
-## 5. Dashboards
-- **Store Performance Dashboard**
-  - Revenue Today vs Target
-  - Avg Basket Size
-  - Gross Margin %
-  - Regional Heatmap
-- **Inventory Risk Dashboard**
-  - Low-stock SKUs
-  - Overstock SKUs
-  - Inventory Turns
-- **Customer Behavior Dashboard**
-  - Attach Rate (bought together)
-  - Loyalty Spend per Visit
-  - Top Cross-Sell Pairs
-
-## 6. Cost & Security
-- Serverless-first (Lambda, Kinesis, Glue, Athena, Redshift Serverless autoscale)
-- S3 is source of truth; historical data ages to Glacier
-- KMS encryption at rest, TLS in transit
-- Lake Formation + row-level security → store managers only see their stores
-
-See `docs/Cost_Security_Notes.md`.
-
-## 7. Operations / Monitoring
-- CloudWatch alarms on Lambda error rate, Kinesis throughput, Glue job failures
-- CloudTrail audit logging for governance
-- SNS alerts for low-stock events to Store Ops leadership
-
-See `docs/Executive_Summary.md` for the business story you tell in interviews.

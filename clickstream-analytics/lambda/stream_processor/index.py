@@ -32,9 +32,7 @@ def _bulk_os(docs):
     for d in docs:
         ndjson.append(json.dumps({"index": {"_index": OS_INDEX}}))
         ndjson.append(json.dumps(d, separators=(",", ":")))
-    body = ("
-".join(ndjson) + "
-").encode("utf-8")
+    body = ("\n".join(ndjson) + "\n").encode("utf-8")
     url = urljoin(OS_ENDPOINT if OS_ENDPOINT.endswith("/") else OS_ENDPOINT + "/", "_bulk")
     max_bytes = 2 * 1024 * 1024
     auth = _auth_header()

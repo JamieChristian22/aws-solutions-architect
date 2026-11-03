@@ -1032,3 +1032,9 @@ See [LICENSE](LICENSE) for the repository license. Third-party code, datasets, i
 ## Reviewer guide and asset provenance
 
 For a concise evidence-review path and asset-licensing verification checklist, see [REVIEWER_GUIDE.md](REVIEWER_GUIDE.md). Sample asset listings are not proof of ownership or redistribution rights.
+
+## Clickstream delivery reliability regression
+
+The [Kinesis-to-Firehose processor](clickstream-analytics/lambda/processor/handler.py) now splits Firehose requests within the 500-record / 4-MiB batch limits, identifies partial failures using **Kinesis sequence numbers** for Lambda retry, and avoids indexing records that Firehose explicitly rejected. OpenSearch writes use the supplied event ID as their stable document ID.
+
+Run `python -m unittest discover -s tests -p 'test_*.py' -v` or review the [clickstream regression workflow](.github/workflows/lambda-regression.yml). Like any at-least-once streaming consumer, retries can duplicate downstream Firehose records; downstream consumers should deduplicate using `event_id`. No live AWS deployment or throughput certification is claimed.

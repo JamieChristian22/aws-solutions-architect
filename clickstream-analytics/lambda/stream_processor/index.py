@@ -28,23 +28,41 @@ def _auth_header():
 def _bulk_os(docs):
     if not (OS_ENDPOINT and OS_SECRET_ARN and docs):
         return {"skipped": True}
-    ndjson = []
-    for d in docs:
-        ndjson.append(json.dumps({"index": {"_index": OS_INDEX}}))
-        ndjson.append(json.dumps(d, separators=(",", ":")))
-    body = ("\n".join(ndjson) + "\n").encode("utf-8")
     url = urljoin(OS_ENDPOINT if OS_ENDPOINT.endswith("/") else OS_ENDPOINT + "/", "_bulk")
     max_bytes = 2 * 1024 * 1024
     auth = _auth_header()
     chunks_ok = 0
-    for i in range(0, len(body), max_bytes):
-        chunk = body[i:i+max_bytes]
-        r = _http.request("POST", url, body=chunk,
-                          headers={"Content-Type":"application/x-ndjson","Authorization":auth,"Connection":"keep-alive"})
-        if r.status >= 300:
-            print(f"[OS BULK ERROR] status={r.status} body={r.data[:400]!r}")
-        else:
-            chunks_ok += 1
+    buffer = bytearray()
+
+    def send(chunk):
+        response = _http.request(
+            "POST", url, body=chunk,
+            headers={
+                "Content-Type": "application/x-ndjson",
+                "Authorization": auth,
+                "Connection": "keep-alive",
+            },
+        )
+        if response.status >= 300:
+            print(f"[OS BULK ERROR] status={response.status} body={response.data[:400]!r}")
+            return False
+        return True
+
+    for document in docs:
+        # Keep an action line and its source document together in one request.
+        entry = (
+            json.dumps({"index": {"_index": OS_INDEX}}) + "\n"
+            + json.dumps(document, separators=(",", ":")) + "\n"
+        ).encode("utf-8")
+        if len(entry) > max_bytes:
+            raise ValueError("A single OpenSearch bulk record exceeds the 2 MiB limit")
+        if buffer and len(buffer) + len(entry) > max_bytes:
+            if send(bytes(buffer)):
+                chunks_ok += 1
+            buffer.clear()
+        buffer.extend(entry)
+    if buffer and send(bytes(buffer)):
+        chunks_ok += 1
     return {"chunks_ok": chunks_ok}
 
 def handler(event, context):

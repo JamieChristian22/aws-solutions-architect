@@ -1024,3 +1024,7 @@ This policy keeps the repository **technically credible, transparent, and interv
 **Focus:** AWS Solutions Architecture • Cloud Consulting • Security • FinOps • Cloud Platforms
 
 **GitHub:** [github.com/JamieChristian22](https://github.com/JamieChristian22)
+
+## License and third-party materials
+
+See [LICENSE](LICENSE) for the repository license. Third-party code, datasets, images, and other assets retain their respective terms.
